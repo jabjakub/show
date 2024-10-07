@@ -1,0 +1,12 @@
+green_account_dbt:
+  outputs:
+    dev:
+      dbname: green_account
+      host: "{{ env_var('DBT_ENV_SECRET_POSTGRES_HOST') }}"
+      pass: "{{ env_var('DBT_ENV_SECRET_POSTGRES_PASSWORD') }}"
+      port: 5432
+      schema: green_account_dbt
+      threads: 4
+      type: postgres
+      user: postgres
+  target: dev

@@ -1,0 +1,39 @@
+on: workflow_dispatch # manually triggered in the UI
+
+jobs:
+  deploy:
+    name: Run the data pipeline
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'  # Set the desired Python version
+
+    - name: Install pip libraries
+      run: |
+        pip install dbt-core dbt-postgres dlt "dlt[postgres]"
+        pip install -r requirements.txt
+
+    - name: Run dlt pipeline
+      env:
+        DESTINATION__POSTGRES__CREDENTIALS__DATABASE: green_account
+        DESTINATION__POSTGRES__CREDENTIALS__PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Use GitHub secrets for sensitive data
+        DESTINATION__POSTGRES__CREDENTIALS__USERNAME: postgres
+        DESTINATION__POSTGRES__CREDENTIALS__HOST: ${{ secrets.POSTGRES_HOST }}  # Use secrets for host as well
+        DESTINATION__POSTGRES__CREDENTIALS__PORT: 5432
+      run: |
+        python3 green_account_postgres_pipeline.py
+
+    # Uncomment and update the following dbt step when needed
+    - name: Run dbt build
+      env:
+        DBT_ENV_SECRET_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }} # Use env vars for sensitive data
+        DBT_ENV_SECRET_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }} # Use env vars for sensitive data
+      run: |
+        cd green_account_dbt
+        dbt build --profiles-dir ./
