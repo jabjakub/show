@@ -17,6 +17,7 @@ jobs:
     - name: Install pip libraries
       run: |
         pip install dbt-core dbt-postgres dlt "dlt[postgres]"
+        pip install shapely
         pip install -r requirements.txt
 
     - name: Run dlt pipeline
